@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form Input Ketebalan Kabel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/form.css') }}"
+    />
+  </head>
+  <body class="train-bg">
+    <!-- Loading Overlay -->
+    <div
+      id="loadingOverlay"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"
+    >
+      <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
+        <div class="loading-spinner mx-auto mb-4"></div>
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">Memproses Data</h3>
+        <p class="text-gray-600 mb-4">Sedang menganalisis data kabel...</p>
+      </div>
+    </div>
+
+    <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+          <div
+            class="inline-flex items-center justify-center w-20 h-20 bg-white bg-opacity-20 rounded-full mb-4"
+          >
+            <i class="fas fa-train text-white text-3xl"></i>
+          </div>
+          <h1 class="text-4xl font-bold text-white mb-2">
+            Sistem Monitoring KAI
+          </h1>
+          <p class="text-white text-opacity-80 text-lg">
+            Analisis Data Ketebalan, Ketinggian & Deviasi
+          </p>
+        </div>
+
+        <!-- Database Configuration Form -->
+        <div class="glass-effect rounded-3xl p-6 mb-8">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-3">
+              <i class="fas fa-database text-white text-xl"></i>
+              <h3 class="text-xl font-bold text-white">Konfigurasi Database</h3>
+              <span
+                id="db-status"
+                class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-500 text-white"
+              >
+                Belum Terkonfigurasi
+              </span>
+            </div>
+            <button
+              id="toggle-db-config"
+              type="button"
+              class="text-white hover:text-gray-200 transition-colors duration-200"
+            >
+              <i id="toggle-icon" class="fas fa-chevron-down text-xl"></i>
+            </button>
+          </div>
+
+          <!-- Database Configuration Panel -->
+          <div id="db-config-panel" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <!-- Server -->
+              <div class="bg-white bg-opacity-90 rounded-xl p-4">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-server mr-2 text-blue-600"></i>
+                  Server
+                </label>
+                <input
+                  type="text"
+                  id="db-server"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  placeholder="Server address"
+                />
+              </div>
+
+              <!-- Port -->
+              <div class="bg-white bg-opacity-90 rounded-xl p-4">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-plug mr-2 text-green-600"></i>
+                  Port
+                </label>
+                <input
+                  type="number"
+                  id="db-port"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
+                  placeholder="Port number"
+                />
+              </div>
+
+              <!-- Username -->
+              <div class="bg-white bg-opacity-90 rounded-xl p-4">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-user mr-2 text-orange-600"></i>
+                  Username
+                </label>
+                <input
+                  type="text"
+                  id="db-username"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                  placeholder="Username"
+                />
+              </div>
+
+              <!-- Password -->
+              <div class="bg-white bg-opacity-90 rounded-xl p-4">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  <i class="fas fa-lock mr-2 text-red-600"></i>
+                  Password
+                </label>
+                <div class="relative">
+                  <input
+                    type="password"
+                    id="db-password"
+                    class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200"
+                    placeholder="Password"
+                  />
+                  <button
+                    type="button"
+                    id="toggle-password"
+                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    <i id="password-icon" class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex space-x-4">
+              <button
+                type="button"
+                id="test-connection-btn"
+                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2"
+              >
+                <i id="test-icon" class="fas fa-plug"></i>
+                <span id="test-text">Test Koneksi</span>
+              </button>
+
+              <button
+                type="button"
+                id="save-config-btn"
+                disabled
+                class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <i class="fas fa-save"></i>
+                <span>Simpan Konfigurasi</span>
+              </button>
+
+              <button
+                type="button"
+                id="clear-config-btn"
+                class="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center"
+                title="Hapus konfigurasi tersimpan"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+
+            <!-- Connection Status Messages -->
+            <div id="connection-message" class="mt-4 hidden">
+              <div
+                id="success-message"
+                class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg hidden"
+              >
+                <div class="flex items-center">
+                  <i class="fas fa-check-circle mr-2"></i>
+                  <span>Koneksi database berhasil!</span>
+                </div>
+              </div>
+              <div
+                id="error-message"
+                class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg hidden"
+              >
+                <div class="flex items-center">
+                  <i class="fas fa-exclamation-triangle mr-2"></i>
+                  <span id="error-text">Koneksi database gagal!</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <div class="glass-effect rounded-3xl p-6 mb-8">
+          <div
+            class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-6"
+          >
+            <button
+              id="menu-ketebalan"
+              class="menu-btn active flex items-center space-x-3 px-6 py-3 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all duration-200"
+              onclick="switchMenu('ketebalan')"
+            >
+              <i class="fas fa-chart-line"></i>
+              <span>Analisis Ketebalan</span>
+            </button>
+
+            <button
+              id="menu-ketinggian"
+              class="menu-btn flex items-center space-x-3 px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-green-600 transition-all duration-200"
+              onclick="switchMenu('ketinggian')"
+            >
+              <i class="fas fa-mountain"></i>
+              <span>Analisis Ketinggian</span>
+            </button>
+
+            <button
+              id="menu-deviasi"
+              class="menu-btn flex items-center space-x-3 px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-purple-600 transition-all duration-200"
+              onclick="switchMenu('deviasi')"
+            >
+              <i class="fas fa-wave-square"></i>
+              <span>Analisis Deviasi</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Form -->
+        <div class="glass-effect rounded-3xl p-8 mb-8">
+          <!-- Form Title -->
+          <div class="text-center mb-6">
+            <h2 id="form-title" class="text-2xl font-bold text-white">
+              <i class="fas fa-chart-line mr-2"></i>
+              Form Analisis Ketebalan Kabel
+            </h2>
+            <p id="form-description" class="text-white text-opacity-80 mt-2">
+              Masukkan parameter untuk analisis ketebalan kabel
+            </p>
+          </div>
+
+          <form method="POST" id="mainForm">
+            <!-- Hidden field untuk menyimpan jenis analisis -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <!-- Database Name -->
+              <div class="gradient-border">
+                <div class="p-4">
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-database mr-2 text-purple-600"></i>
+                    Nama Database
+                  </label>
+                  <select
+                    name="database_name"
+                    id="database_name"
+                    required
+                    disabled
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="" disabled selected>
+                      Konfigurasi server terlebih dahulu
+                    </option>
+                  </select>
+                  <div
+                    id="database_loading"
+                    class="text-sm text-gray-500 mt-2 hidden"
+                  >
+                    <i class="fas fa-spinner fa-spin mr-1"></i>
+                    Memuat daftar database...
+                  </div>
+                  <div
+                    id="database_error"
+                    class="text-sm text-red-500 mt-2 hidden"
+                  >
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    Gagal memuat daftar database
+                  </div>
+                </div>
+              </div>
+
+              <!-- Table Name -->
+              <div class="gradient-border">
+                <div class="p-4">
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-table mr-2 text-blue-600"></i>
+                    Nama Tabel
+                  </label>
+                  <select
+                    name="table_name"
+                    id="table_name"
+                    required
+                    disabled
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="" disabled selected>
+                      Pilih database terlebih dahulu
+                    </option>
+                  </select>
+                  <div
+                    id="table_loading"
+                    class="text-sm text-gray-500 mt-2 hidden"
+                  >
+                    <i class="fas fa-spinner fa-spin mr-1"></i>
+                    Memuat daftar tabel...
+                  </div>
+                  <div
+                    id="table_error"
+                    class="text-sm text-red-500 mt-2 hidden"
+                  >
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    Gagal memuat daftar tabel
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hidden field untuk menyimpan jenis analisis -->
+            <input
+              type="hidden"
+              name="analysis_type"
+              id="analysis_type"
+              value="ketebalan"
+            />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <!-- Lintas -->
+              <div class="gradient-border">
+                <div class="p-4">
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-route mr-2 text-green-600"></i>
+                    Lintas
+                  </label>
+                  <select
+                    name="lintas"
+                    id="lintas"
+                    required
+                    disabled
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-gray-50 focus:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="" disabled selected>
+                      Pilih tabel terlebih dahulu
+                    </option>
+                  </select>
+                  <div
+                    id="lintas_loading"
+                    class="text-sm text-gray-500 mt-2 hidden"
+                  >
+                    <i class="fas fa-spinner fa-spin mr-1"></i>
+                    Memuat daftar lintas...
+                  </div>
+                  <div
+                    id="lintas_error"
+                    class="text-sm text-red-500 mt-2 hidden"
+                  >
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    Gagal memuat daftar lintas
+                  </div>
+                </div>
+              </div>
+
+              <!-- Trip -->
+              <div class="gradient-border">
+                <div class="p-4">
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-calendar-alt mr-2 text-purple-600"></i>
+                    Trip
+                  </label>
+                  <select
+                    name="trip"
+                    id="trip"
+                    required
+                    disabled
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="" disabled selected>
+                      Pilih lintas terlebih dahulu
+                    </option>
+                  </select>
+                  <div
+                    id="trip_loading"
+                    class="text-sm text-gray-500 mt-2 hidden"
+                  >
+                    <i class="fas fa-spinner fa-spin mr-1"></i>
+                    Memuat daftar trip...
+                  </div>
+                  <div id="trip_error" class="text-sm text-red-500 mt-2 hidden">
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    Gagal memuat daftar trip
+                  </div>
+                </div>
+              </div>
+
+              <!-- Total Stasiun -->
+              <div class="gradient-border">
+                <div class="p-4">
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-map-marker-alt mr-2 text-red-600"></i>
+                    Total Stasiun
+                  </label>
+                  <input
+                    type="number"
+                    name="total_stasiun"
+                    id="total_stasiun"
+                    min="1"
+                    max="20"
+                    required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-gray-50 focus:bg-white"
+                    placeholder="Jumlah stasiun (1-20)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Station Container -->
+            <div id="stasiun_container" class="space-y-6"></div>
+
+            <!-- Submit Button -->
+            <div class="text-center mt-8">
+              <button
+                type="submit"
+                id="submit-btn"
+                class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center mx-auto space-x-2"
+              >
+                <i id="submit-icon" class="fas fa-chart-line"></i>
+                <span id="submit-text">Proses Data Ketebalan</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/form.js') }}"></script>
+  </body>
+</html>
