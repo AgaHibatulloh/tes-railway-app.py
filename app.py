@@ -2,10 +2,10 @@ import os
 from matplotlib.backends.backend_pdf import PdfPages
 from sqlalchemy import create_engine, text
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')  # Set backend before importing pyplot
 import matplotlib.pyplot as plt
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for, jsonify, session
-import matplotlib
-matplotlib.use('Agg')
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')  # Use environment variable in production
@@ -18,6 +18,12 @@ DEFAULT_DB_CONFIG = {
     'username': 'kai_user',
     'password': 'passwordku123'
 }
+
+
+@app.route('/health')
+def health():
+    """Health check endpoint for Railway"""
+    return jsonify({'status': 'healthy', 'message': 'Application is running'})
 
 
 @app.route('/api/test-connection', methods=['POST'])
@@ -34,8 +40,7 @@ def test_connection():
 
         # Test connection without specifying database (connect to master)
         connection_string = (
-            f"mssql+pyodbc://{config['username']}:{config['password']}@{config['server']}:{config['port']}/master"
-            "?driver=ODBC+Driver+17+for+SQL+Server"
+            f"mssql+pymssql://{config['username']}:{config['password']}@{config['server']}:{config['port']}/master"
         )
 
         test_engine = create_engine(connection_string)
@@ -59,8 +64,7 @@ def get_databases():
             return jsonify({'success': False, 'error': 'Konfigurasi database belum tersedia'})
 
         connection_string = (
-            f"mssql+pyodbc://{config['username']}:{config['password']}@{config['server']}:{config['port']}/master"
-            "?driver=ODBC+Driver+17+for+SQL+Server"
+            f"mssql+pymssql://{config['username']}:{config['password']}@{config['server']}:{config['port']}/master"
         )
 
         engine = create_engine(connection_string)
@@ -89,8 +93,7 @@ def get_tables(database_name):
         config['database'] = database_name
 
         connection_string = (
-            f"mssql+pyodbc://{config['username']}:{config['password']}@{config['server']}:{config['port']}/{database_name}"
-            "?driver=ODBC+Driver+17+for+SQL+Server"
+            f"mssql+pymssql://{config['username']}:{config['password']}@{config['server']}:{config['port']}/{database_name}"
         )
 
         engine = create_engine(connection_string)
@@ -122,8 +125,7 @@ def get_lintas(database_name, table_name):
 
         config['database'] = database_name
         connection_string = (
-            f"mssql+pyodbc://{config['username']}:{config['password']}@{config['server']}:{config['port']}/{database_name}"
-            "?driver=ODBC+Driver+17+for+SQL+Server"
+            f"mssql+pymssql://{config['username']}:{config['password']}@{config['server']}:{config['port']}/{database_name}"
         )
 
         engine = create_engine(connection_string)
@@ -150,8 +152,7 @@ def get_trip(database_name, table_name, lintas):
 
         config['database'] = database_name
         connection_string = (
-            f"mssql+pyodbc://{config['username']}:{config['password']}@{config['server']}:{config['port']}/{database_name}"
-            "?driver=ODBC+Driver+17+for+SQL+Server"
+            f"mssql+pymssql://{config['username']}:{config['password']}@{config['server']}:{config['port']}/{database_name}"
         )
 
         engine = create_engine(connection_string)
@@ -172,8 +173,7 @@ def get_db_engine():
     """Get database engine with current configuration"""
     config = session.get('db_config', DEFAULT_DB_CONFIG)
     connection_string = (
-        f"mssql+pyodbc://{config['username']}:{config['password']}@{config['server']}:{config['port']}/{config.get('database', 'KAI')}"
-        "?driver=ODBC+Driver+17+for+SQL+Server"
+        f"mssql+pymssql://{config['username']}:{config['password']}@{config['server']}:{config['port']}/{config.get('database', 'KAI')}"
     )
     return create_engine(connection_string)
 

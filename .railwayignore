@@ -1,0 +1,9 @@
+# Railway ignore file
+WEB_KETEBALAN_PER_100M/
+WEB_KETINGGIAN_PER_100M/
+WEB_DEVIASI_PER_100M/
+*.pdf
+__pycache__/
+*.pyc
+.env
+.env.local
