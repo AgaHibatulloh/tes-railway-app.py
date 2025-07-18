@@ -1,4 +1,5 @@
 import os
+import logging
 from matplotlib.backends.backend_pdf import PdfPages
 from sqlalchemy import create_engine, text
 import pandas as pd
@@ -7,23 +8,40 @@ matplotlib.use('Agg')  # Set backend before importing pyplot
 import matplotlib.pyplot as plt
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for, jsonify, session
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')  # Use environment variable in production
 
 # Default database configuration
 DEFAULT_DB_CONFIG = {
-    'server': 'localhost',
-    'port': 1433,
-    'database': 'KAI',
-    'username': 'kai_user',
-    'password': 'passwordku123'
+    'server': os.environ.get('DB_SERVER', 'localhost'),
+    'port': int(os.environ.get('DB_PORT', 1433)),
+    'database': os.environ.get('DB_DATABASE', 'KAI'),
+    'username': os.environ.get('DB_USERNAME', 'kai_user'),
+    'password': os.environ.get('DB_PASSWORD', 'passwordku123')
 }
 
 
 @app.route('/health')
 def health():
     """Health check endpoint for Railway"""
-    return jsonify({'status': 'healthy', 'message': 'Application is running'})
+    try:
+        # Test basic functionality
+        logger.info("Health check accessed")
+        return jsonify({
+            'status': 'healthy', 
+            'message': 'Application is running',
+            'timestamp': str(pd.Timestamp.now())
+        })
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        return jsonify({
+            'status': 'unhealthy',
+            'error': str(e)
+        }), 500
 
 
 @app.route('/api/test-connection', methods=['POST'])

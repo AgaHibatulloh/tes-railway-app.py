@@ -1,8 +1,6 @@
-Flask==2.3.3
-SQLAlchemy==2.0.21
-pandas==2.1.1
-matplotlib==3.7.2
-pymssql==2.2.8
-gunicorn==21.2.0
-Werkzeug==2.3.7
-Werkzeug==2.3.7
+Flask>=2.0.0
+SQLAlchemy>=2.0.0
+pandas>=1.5.0
+matplotlib>=3.5.0
+pymssql>=2.2.0
+gunicorn>=20.0.0
