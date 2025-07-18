@@ -1,0 +1,6 @@
+Flask==2.3.3
+SQLAlchemy==2.0.21
+pandas==2.1.1
+matplotlib==3.7.2
+pyodbc==4.0.39
+gunicorn==21.2.0

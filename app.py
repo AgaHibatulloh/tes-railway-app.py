@@ -8,7 +8,7 @@ import matplotlib
 matplotlib.use('Agg')
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'  # Ganti dengan secret key yang aman
+app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')  # Use environment variable in production
 
 # Default database configuration
 DEFAULT_DB_CONFIG = {
@@ -820,4 +820,5 @@ def serve_pdf(filename):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
